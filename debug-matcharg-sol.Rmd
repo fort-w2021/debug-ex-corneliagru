@@ -1,0 +1,71 @@
+## *match*? ARRRGH!
+
+In dieser Aufgabe geht es darum fremden, einigermaßen komplexen Code zu lesen und zu verstehen.
+
+Schauen Sie sich die Hilfe und den Quellcode für `match.arg()` an und kopieren Sie den Quellcode in ihre Lösung.  
+Kommentierten Quellcode für `match.arg()` und andere `base`-Funktionen finden Sie [hier](https://github.com/wch/r-source/blob/ce1ceeddd6ff6a22a76d68a83fc15a50e220e204/src/library/base/R/match.R#L41).
+
+Benutzen Sie den interaktiven Debugger via
+```{r, match_arg_dbg}
+make_something <- function(something = c("mess", "cake", "hyuuge mistake", "merrychristmas")) {
+  something <- match.arg(something, several.ok = TRUE)
+  message("I made a ", something, ".\n")
+  print(something)
+}
+debugonce(match.arg)
+make_something(c("me", "c"))
+```
+um Zeile für Zeile durch `match.arg()` zu gehen. Finden Sie heraus was vor sich geht. Dafür müssen Sie wahrscheinlich `make_something()` auch mal mit anderen Argumenten aufrufen. Schreiben Sie für jede (nicht völlig triviale)  Zeile in `match.arg()` einen Kommentar in ihre Kopie des `match.arg()`-Codes der erklärt wie & warum was passiert.
+
+*Hinweis:* Benutzen Sie hier `debugonce()`, nicht `debug()`, vor allem wenn Sie eine andere Beispielfunktion als die obige benutzen -- sehr viele Funktionen rufen intern `match.arg()` auf und wir wollen nicht dass der Debugger bei jedem Aufruf von `match.arg()` aus einer Unterfunktion heraus in diesen neuen Aufruf springt...  
+
+
+
+```{r}
+
+match.arg <- function(arg, choices, several.ok = FALSE) {
+  # if the possible candidate values are empty, the function takes the arguments of the function one level above
+  if (missing(choices)) {
+    formal.args <- formals(sys.function(sysP <- sys.parent()))
+    choices <- eval(formal.args[[as.character(substitute(arg))]],
+      envir = sys.frame(sysP)
+    )
+  }
+  # if match.arg is called without an argument, the first choice is returned
+  if (is.null(arg)) {
+    return(choices[1L])
+  } # if argument is not an character send error message
+  else if (!is.character(arg)) {
+    stop("'arg' must be NULL or a character vector")
+  }
+  # if only one argument allowed
+  if (!several.ok) { # most important (default) case:
+    ## the arg can be the whole of choices as a default argument. if this is the case the first argument is returned
+    if (identical(arg, choices)) {
+      return(arg[1L])
+    }
+    # if more than one argument (but not all possible arguments) is given a error is called
+    if (length(arg) > 1L) stop("'arg' must be of length 1")
+    # if no arument is given, error is called
+  } else if (length(arg) == 0L) stop("'arg' must be of length >= 1")
+
+  ## handle each element of arg separately
+  # partial matching of arg against choices, if no match or multiple patial matches occur return 0
+  i <- pmatch(arg, choices, nomatch = 0L, duplicates.ok = TRUE)
+  if (all(i == 0L)) {
+    # error if pmatch returned 0 (no or multiple partial matches)
+    stop(gettextf(
+      "'arg' should be one of %s",
+      paste(dQuote(choices), collapse = ", ")
+    ),
+    domain = NA
+    )
+  }
+  i <- i[i > 0L]
+  # i din't understand in which case this happens.... :(
+  if (!several.ok && length(i) > 1) {
+    stop("there is more than one match in 'match.arg'")
+  }
+  choices[i]
+}
+```
