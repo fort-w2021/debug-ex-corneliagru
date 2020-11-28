@@ -62,7 +62,7 @@ match.arg <- function(arg, choices, several.ok = FALSE) {
     )
   }
   i <- i[i > 0L]
-  # i din't understand in which case this happens.... :(
+  # i didn't understand in which case this happens.... :(
   if (!several.ok && length(i) > 1) {
     stop("there is more than one match in 'match.arg'")
   }
