@@ -9,6 +9,9 @@ x <- replicate(
     rt(n_grid, df = 5) / 10
 )
 
+colnames(x) <- 1:80
+
+colnames(x)
 
 # fds creates "functional data"-objects, see ?fds and ?fboxplot
 x_fds <- fds(x = t_grid, y = x)
@@ -17,7 +20,7 @@ layout(t(1:2))
 matplot(t_grid, x, lty = 1, col = rgb(0, 0, 0, .2), type = "l", lwd = 1.5)
 fboxplot(x_fds)
 
-
+debugonce(fboxplot)
 
 # a) Lokalisieren Sie wo im Code der Fehler auftritt (also: *Auslöser* des
 # Fehlers), ermitteln Sie die *Ursache* des Fehlers (nicht das selbe!). Was
