@@ -20,7 +20,7 @@ um Zeile für Zeile durch `match.arg()` zu gehen. Finden Sie heraus was vor sich
 *Hinweis:* Benutzen Sie hier `debugonce()`, nicht `debug()`, vor allem wenn Sie eine andere Beispielfunktion als die obige benutzen -- sehr viele Funktionen rufen intern `match.arg()` auf und wir wollen nicht dass der Debugger bei jedem Aufruf von `match.arg()` aus einer Unterfunktion heraus in diesen neuen Aufruf springt...  
 
 
-
+**Lösung:**
 ```{r}
 
 match.arg <- function(arg, choices, several.ok = FALSE) {
